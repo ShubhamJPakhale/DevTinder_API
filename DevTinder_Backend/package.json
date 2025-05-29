@@ -1,0 +1,16 @@
+{
+  "name": "devtinder_be",
+  "version": "1.0.0",
+  "description": "this contains devtinder backend code ",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "author": "Shubham Pakhale",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0",
+    "nodemon": "^3.1.10"
+  }
+}
