@@ -1,4 +1,5 @@
 const express = require("express");
+const {AdminAuth} = require('./middlewares/adminAuth');
 
 const app = express();
 const PORT = 3000;
@@ -19,30 +20,21 @@ const PORT = 3000;
 
 // GET (/user) => middleware => request handler 
 
-// middleware - 
-app.use("/", (req, res, next) => {
-  console.log("inside middleware !!")
-  next();
-});
+app.use("/admin/login",(req,res,next)=>{
+  res.send("Welcome to the Admin Login Page !!")
+})
+
+//middleware - 
+app.use("/admin", AdminAuth);
 
 // request handler - 
 app.use(
-  "/user",
+  "/admin/getAllData",
   (req, res, next) => {
-    console.log("1st request handler !!");
-    next();
-  },
-  (req, res, next) => {
-    console.log("2nd request handler !!");
-    next();
-  },
-  (req, res, next) => {
-    res.send("3rd request handler !!");
-  },
-  (req, res, next) => {
-    res.send("4th request handler !!");
+    res.send("admin data  !!");
   }
 );
+
 
 // http methods - 
 app.get("/user", (req, res) => {
