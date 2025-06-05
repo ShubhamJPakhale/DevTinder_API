@@ -1,5 +1,5 @@
 const express = require("express");
-const {AdminAuth} = require('./middlewares/adminAuth');
+const { AdminAuth } = require("./middlewares/adminAuth");
 
 const app = express();
 const PORT = 3000;
@@ -18,25 +18,37 @@ const PORT = 3000;
 //   res.send('query param get from dynamic url !!')
 // })
 
-// GET (/user) => middleware => request handler 
+// GET (/user) => middleware => request handler
 
-app.use("/admin/login",(req,res,next)=>{
-  res.send("Welcome to the Admin Login Page !!")
-})
+app.use("/admin/login", (req, res, next) => {
+  res.send("Welcome to the Admin Login Page !!");
+});
 
-//middleware - 
+//middleware -
 app.use("/admin", AdminAuth);
 
-// request handler - 
-app.use(
-  "/admin/getAllData",
-  (req, res, next) => {
-    res.send("admin data  !!");
+
+
+// request handler -
+app.use("/admin/getAllData", (req, res, next) => {
+  // try {
+  //   throw new Error("asafsd");
+  // } catch (err) {
+  //   res.status(500).send("something went wrong !!");
+  // }
+
+  // this will exeute global error handler 
+  throw new Error("jskf ");
+});
+
+// error handler - wildcard - global - if try catch not avilable then this will come in to picture 
+app.use("/",(err,req,res,next)=>{
+  if(err){
+    res.status(500).send("something went wrong happened in code !!");
   }
-);
+})
 
-
-// http methods - 
+// http methods -
 app.get("/user", (req, res) => {
   res.send("Welcome to express node server application !!");
 });
@@ -49,7 +61,7 @@ app.delete("/user", (req, res) => {
   res.send("Record deleted successfully from the DB !!");
 });
 
-// port listening client request - 
+// port listening client request -
 app.listen(PORT, () => {
   console.log(`App is listening on ${PORT}`);
 });
