@@ -1,67 +1,34 @@
 const express = require("express");
-const { AdminAuth } = require("./middlewares/adminAuth");
-
+const { connecttoDB } = require("./config/database");
+const User = require("./models/user");
 const app = express();
 const PORT = 3000;
 
-// In any api type, /user -  will execute the this endpoint
-// app.use("/user", (req, res) => {
-//   res.send(
-//     "irrespective of request to the user endpoint.. this will execute.. order matters.. if we place this at end of code i.e. after all route code then this will only execute when above route matching not found !!"
-//   );
-// });
+app.post("/signup", async (req, res) => {
+  const userdata = new User({
+    firstName: "Archana",
+    lastName: "Pakhale",
+    emailId: "shubham@gmail.com",
+    password: "archu%89f",
+    age: 26,
+    gender: "Female",
+  });
 
-// dynamic url reading using query param ->
-// app.use('/user',(req,res)=>{
-//   console.log('request parameters - ',req.query);
-//   //console.log('request parameters - ',JSON.stringify(req.query));
-//   res.send('query param get from dynamic url !!')
-// })
-
-// GET (/user) => middleware => request handler
-
-app.use("/admin/login", (req, res, next) => {
-  res.send("Welcome to the Admin Login Page !!");
-});
-
-//middleware -
-app.use("/admin", AdminAuth);
-
-
-
-// request handler -
-app.use("/admin/getAllData", (req, res, next) => {
-  // try {
-  //   throw new Error("asafsd");
-  // } catch (err) {
-  //   res.status(500).send("something went wrong !!");
-  // }
-
-  // this will exeute global error handler 
-  throw new Error("jskf ");
-});
-
-// error handler - wildcard - global - if try catch not avilable then this will come in to picture 
-app.use("/",(err,req,res,next)=>{
-  if(err){
-    res.status(500).send("something went wrong happened in code !!");
+  try {
+    await userdata.save();
+    res.send("User data added successfully inside DB !!");
+  } catch (err) {
+    res.status(400).send(`Error while saving data to the DB: ${err.message}`);
   }
-})
-
-// http methods -
-app.get("/user", (req, res) => {
-  res.send("Welcome to express node server application !!");
 });
 
-app.post("/user", (req, res) => {
-  res.send("Data stored to the DB Successfully !!");
-});
-
-app.delete("/user", (req, res) => {
-  res.send("Record deleted successfully from the DB !!");
-});
-
-// port listening client request -
-app.listen(PORT, () => {
-  console.log(`App is listening on ${PORT}`);
-});
+connecttoDB()
+  .then(() => {
+    console.log("Database connection established successfully !!");
+    app.listen(PORT, () => {
+      console.log(`App is listening on ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Database connection not established..please try again.. !!");
+  });
