@@ -1,8 +1,10 @@
 const express = require("express");
 const { connecttoDB } = require("./config/database");
 const User = require("./models/user");
+require("dotenv").config();
+
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
@@ -118,6 +120,7 @@ app.patch("/user", async (req, res) => {
 //     res.status(400).send("Update failed: " + err.message);
 //   }
 // });
+
 
 // update the user information whose first matching document has firstName
 app.patch("/userfn/:firstName", async (req, res) => {
