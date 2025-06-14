@@ -1,11 +1,35 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const userSchema = mongoose.Schema(
   {
     firstName: { type: String, required: true, minLength: 4, maxLength: 20 },
-    lastName: { type: String },
-    emailId: { type: String, unique: true, lowercase: true, trim: true },
-    password: { type: String },
+    lastName: { type: String, minLength: 1 },
+    emailId: {
+      type: String,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      required: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Invalid EmailId : " + value);
+        }
+      },
+    },
+    password: {
+      type: String,
+      required: true,
+      // match: [
+      //   /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,12}$/,
+      //   "Password must be 8-12 characters long, include at least one uppercase letter, one number, and one special character.",
+      // ],
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
+          throw new Error("Enter a strong password !!");
+        }
+      },
+    },
     age: { type: Number, min: 18 },
     gender: {
       type: String,
@@ -18,11 +42,24 @@ const userSchema = mongoose.Schema(
       },
     },
     about: { type: String, default: "This is the default about of user !!" },
-    photo: {
+    photoUrl: {
       type: String,
       default: "https://i.sstatic.net/l60Hf.png",
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Invalid Photo URL : " + value);
+        }
+      },
     },
-    skills: [String],
+    skills: {
+      type: [String],
+      validate: {
+        validator: function (value) {
+          return value.length <= 10;
+        },
+        message: "Maximum 10 skills allowed for the user!!",
+      },
+    },
   },
   { timestamps: true }
 );

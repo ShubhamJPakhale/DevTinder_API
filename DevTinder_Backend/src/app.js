@@ -1,6 +1,8 @@
 const express = require("express");
 const { connecttoDB } = require("./config/database");
 const User = require("./models/user");
+const { validateSignupData } = require("./utils/validator");
+const bcrypt = require("bcrypt");
 require("dotenv").config();
 
 const app = express();
@@ -10,13 +12,39 @@ app.use(express.json());
 
 // signup post data to the user inside DB -
 app.post("/signup", async (req, res) => {
-  //create instance of User model to inset the data in to MondoDB
-  const userdata = new User(req.body);
   try {
+    // valid the data once signup api hits
+    validateSignupData(req);
+
+    const {
+      firstName,
+      lastName,
+      emailId,
+      password,
+      age,
+      gender,
+      about,
+      photoUrl,
+      skills,
+    } = req.body;
+    // Encrypt the password
+    const passwordHash = await bcrypt.hash(password, 10);
+    //create instance of User model to inset the data in to MondoDB
+    const userdata = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+      age,
+      gender,
+      about,
+      photoUrl,
+      skills,
+    });
     await userdata.save();
     res.send("User data added successfully inside DB !!");
   } catch (err) {
-    res.status(400).send(`Error while saving data to the DB: ${err.message}`);
+    res.status(400).send(`ERROR WHILE SAVING TO DB : ${err.message}`);
   }
 });
 
@@ -77,10 +105,18 @@ app.delete("/user/:id", async (req, res) => {
 });
 
 // update the user information by id
-app.patch("/user", async (req, res) => {
-  const userid = req.body._id;
+app.patch("/user/:userId", async (req, res) => {
+  const userid = req.params?.userId;
   const data = req.body;
   try {
+    const ALLOWED_UPDATES = ["photoUrl", "age", "skills", "gender", "about"];
+    const isAllowedUpdates = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
+    if (!isAllowedUpdates) {
+      throw new Error("Update not allowed !!");
+    }
+
     const users = await User.findByIdAndUpdate({ _id: userid }, data, {
       returnDocument: "after",
       runValidators: true,
@@ -91,7 +127,7 @@ app.patch("/user", async (req, res) => {
     }
     res.status(200).send("User updated successfully");
   } catch (err) {
-    res.status(400).send("updated error - "+err.message);
+    res.status(400).send("UPDATE ERROR - " + err.message);
   }
 });
 
