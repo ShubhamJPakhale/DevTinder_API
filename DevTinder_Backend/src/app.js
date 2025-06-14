@@ -83,15 +83,15 @@ app.patch("/user", async (req, res) => {
   try {
     const users = await User.findByIdAndUpdate({ _id: userid }, data, {
       returnDocument: "after",
+      runValidators: true,
     });
 
     if (!users) {
       return res.status(404).send("User not found");
     }
-    console.log(users);
     res.status(200).send("User updated successfully");
   } catch (err) {
-    res.status(400).send("Something went wrong !!");
+    res.status(400).send("updated error - "+err.message);
   }
 });
 
@@ -120,7 +120,6 @@ app.patch("/user", async (req, res) => {
 //     res.status(400).send("Update failed: " + err.message);
 //   }
 // });
-
 
 // update the user information whose first matching document has firstName
 app.patch("/userfn/:firstName", async (req, res) => {
