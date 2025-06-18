@@ -64,4 +64,14 @@ const userSchema = mongoose.Schema(
   { timestamps: true }
 );
 
+userSchema.methods.getJWTToken = async function () {
+  const user = this;
+
+  const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
+
+  return token;
+};
+
 module.exports = mongoose.model("User", userSchema);

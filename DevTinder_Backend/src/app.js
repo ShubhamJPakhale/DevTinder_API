@@ -4,11 +4,16 @@ const User = require("./models/user");
 const { validateSignupData } = require("./utils/validator");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
+const cookieparser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { UserAuth } = require("./middlewares/adminAuth");
+const user = require("./models/user"); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cookieparser());
 
 // signup post data to the user inside DB -
 app.post("/signup", async (req, res) => {
@@ -44,7 +49,7 @@ app.post("/signup", async (req, res) => {
     await userdata.save();
     res.send("User data added successfully inside DB !!");
   } catch (err) {
-    res.status(400).send(`ERROR WHILE SAVING TO DB : ${err.message}`);
+    res.status(400).send(`ERROR - ${err.message}`);
   }
 });
 
@@ -56,166 +61,45 @@ app.post("/login", async (req, res) => {
     if (!user) {
       throw new Error("Invalid Credentials !!");
     }
-    console.log("user - ", user);
 
     const isPasswordvalid = await bcrypt.compare(password, user.password);
-    console.log("ispasswordvalid -- ", isPasswordvalid);
 
     if (isPasswordvalid) {
+      // token is generated here
+      const token = await user.getJWTToken();
+      // token will be stored in the cookies
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 8 * 3600000),
+      });
+
       res.send("Login Successfull !!");
     } else {
       throw new Error("Invalid Credentials !!");
     }
   } catch (err) {
-    res.status(400).send("Error : "+ err.message);
+    res.status(400).send(`Error - ${err.message}`);
   }
 });
 
-// get the user by emailId
-app.get("/user", async (req, res) => {
-  const userEmailId = req.body.emailId;
-
+app.get("/profile", UserAuth, async (req, res) => {
   try {
-    const users = await User.find({ emailId: userEmailId });
-    if (users.length === 0) {
-      res.status(404).send("user with the above email id not found !!");
-    } else {
-      res.send(users);
-    }
+    const user = req.user;
+
+    return res.status(200).send(user);
   } catch (err) {
-    res.status(400).send("Something went wrong !!");
+    res.status(400).send(`Error - ${err.message}`);
   }
 });
 
-// get the user by firstName - findOne
-app.get("/userfn", async (req, res) => {
-  const userfirstname = req.body.firstName;
-
+app.post("/sendConnectionRequest", UserAuth, async (req, res) => {
   try {
-    const users = await User.findOne({ firstName: userfirstname });
-    if (users.length === 0) {
-      res.status(404).send("user with the above firstName not found !!");
-    } else {
-      res.send(users);
-    }
+    const user = req.user;
+
+    res
+      .status(200)
+      .send(`${user.firstName} ${user.lastName} Sent Connection request !!`);
   } catch (err) {
-    res.status(400).send("Something went wrong !!");
-  }
-});
-
-// get user by id
-app.get("/user/:id", async (req, res) => {
-  const userid = req.params.id;
-
-  try {
-    const users = await User.findById(userid);
-    res.status(200).send(users);
-  } catch (err) {
-    res.status(400).send("Something went wrong !!");
-  }
-});
-
-// get user by id and delete it from db
-app.delete("/user/:id", async (req, res) => {
-  const userid = req.params.id;
-
-  try {
-    const users = await User.findByIdAndDelete(userid);
-    res.status(200).send("user deleted from db successfully !!");
-  } catch (err) {
-    res.status(400).send("Something went wrong !!");
-  }
-});
-
-// update the user information by id
-app.patch("/user/:userId", async (req, res) => {
-  const userid = req.params?.userId;
-  const data = req.body;
-  try {
-    const ALLOWED_UPDATES = ["photoUrl", "age", "skills", "gender", "about"];
-    const isAllowedUpdates = Object.keys(data).every((k) =>
-      ALLOWED_UPDATES.includes(k)
-    );
-    if (!isAllowedUpdates) {
-      throw new Error("Update not allowed !!");
-    }
-
-    const users = await User.findByIdAndUpdate({ _id: userid }, data, {
-      returnDocument: "after",
-      runValidators: true,
-    });
-
-    if (!users) {
-      return res.status(404).send("User not found");
-    }
-    res.status(200).send("User updated successfully");
-  } catch (err) {
-    res.status(400).send("UPDATE ERROR - " + err.message);
-  }
-});
-
-// NOTE - we can not use same route with two different condition in code - use distinguish endpoint for each
-// update the user information whose first matching document has emailId
-// app.patch("/user", async (req, res) => {
-//   const useremailId = req.body.emailId;
-//   const updateData = req.body;
-
-//   try {
-//     const user = await User.findOneAndUpdate(
-//       { emailId: useremailId },
-//       { $set: updateData },
-//       {
-//         returnDocument: "after",
-//         runValidators: true,
-//       }
-//     );
-
-//     if (!user) {
-//       return res.status(404).send("User not found");
-//     }
-
-//     res.status(200).json(user);
-//   } catch (err) {
-//     res.status(400).send("Update failed: " + err.message);
-//   }
-// });
-
-// update the user information whose first matching document has firstName
-app.patch("/userfn/:firstName", async (req, res) => {
-  const userfirstname = req.params.firstName;
-  const updateData = req.body;
-
-  try {
-    if (updateData.emailId) {
-      const existingEmail = await User.findOne({ emailId: updateData.emailId });
-      if (existingEmail && existingEmail.firstName !== userfirstname) {
-        return res.status(409).send("Email already exists!");
-      }
-    }
-
-    const user = await User.findOneAndUpdate(
-      { firstName: userfirstname },
-      { $set: updateData },
-      { returnDocument: "after", runValidators: true }
-    );
-
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    res.status(200).json(user);
-  } catch (err) {
-    res.status(400).send("Update failed: " + err.message);
-  }
-});
-
-// get the all the user from db
-app.get("/feed", async (req, res) => {
-  try {
-    const user = await User.find({});
-    res.send(user);
-  } catch (err) {
-    res.status(404).send("No data found in db");
+    res.status(400).send(`Error - ${err.message}`);
   }
 });
 
