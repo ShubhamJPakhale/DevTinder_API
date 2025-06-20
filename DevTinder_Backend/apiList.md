@@ -8,11 +8,11 @@
 ## profileRouter
 - GET /profile/view
 - PATCH /profile/edit
-- PATCH /profile/password
+- PATCH /profile/password -- for forget password 
 
 ## connectionRequestRouter
-- POST /request/send/intereted/:userId
-- POST /request/send/ignored/:userId
+- POST /request/send/:status/:userId
+
 - POST /request/review/accepted/:requestId
 - POST /request/review/rejected/:requestId
 
