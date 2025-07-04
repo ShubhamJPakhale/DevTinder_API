@@ -3,11 +3,13 @@ const mongoose = require("mongoose");
 const ConnectionRequestScehma = new mongoose.Schema({
     senderUserId:{
         type:mongoose.Schema.Types.ObjectId,
-        required:true
+        required:true,
+        ref:"User"
     },
     receiverUserId:{
         type:mongoose.Schema.Types.ObjectId,
-        required:true
+        required:true,
+        ref:"User"
     },
     status:{
         type:String,
@@ -22,6 +24,8 @@ const ConnectionRequestScehma = new mongoose.Schema({
     timestamps:true
 });
 
+// this pre method will be called before saving the connection request - 
+// used to validate the receiver and sender user ids are not same - if same then throw and error 
 ConnectionRequestScehma.pre('save', function(next) {
   const connectionRequest = this;
 
