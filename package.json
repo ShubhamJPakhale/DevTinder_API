@@ -1,7 +1,7 @@
 {
   "name": "devtinder_be",
   "version": "1.0.0",
-  "description": "this contains devtinder backend code ",
+  "description": "DevTinder Backend API",
   "main": "index.js",
   "scripts": {
     "start": "node src/app.js",
