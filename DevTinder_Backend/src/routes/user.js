@@ -3,6 +3,7 @@ const { UserAuth } = require("../middlewares/adminAuth");
 const connectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
 const { connect } = require("mongoose");
+const { parse } = require("dotenv");
 const userRoute = express.Router();
 
 const Request_User_Populate = "firstName lastName photoUrl gender about skills";
@@ -83,6 +84,11 @@ userRoute.get("/feed", UserAuth, async (req, res) => {
   try {
     const loggedInuser = req.user;
 
+    const page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    limit = limit > 10 ? 10 : limit;
+    const skip = (page - 1) * limit;
+
     // which user to show in feed -
     // 1. Exclude the logged in user
     // 2. Exclude the users with whom logged in user has sent the connection request or accepted connection request
@@ -113,7 +119,10 @@ userRoute.get("/feed", UserAuth, async (req, res) => {
         { _id: { $ne: loggedInuser._id } },
         { _id: { $nin: Array.from(hideuserfromfeed) } },
       ],
-    }).select(Request_User_Populate);
+    })
+      .select(Request_User_Populate)
+      .skip(skip)
+      .limit(limit);
 
     res.json({
       message: "Feed data",
