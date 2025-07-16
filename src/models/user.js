@@ -36,9 +36,9 @@ const userSchema = mongoose.Schema(
     gender: {
       type: String,
       validate(value) {
-        if (!["male", "female", "other"].includes(value)) {
+        if (!["Male", "Female", "Other"].includes(value)) {
           throw new Error(
-            "Enter a valid gender between male, female and others !!"
+            "Enter a valid gender between Male, Female and Other !!"
           );
         }
       },
