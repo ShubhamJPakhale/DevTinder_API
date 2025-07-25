@@ -35,5 +35,5 @@ connecttoDB()
     });
   })
   .catch((err) => {
-    console.error("Database connection not established..please try again.. !!");
+    console.error("Database connection not established..please try again.. !!", err.message);
   });
