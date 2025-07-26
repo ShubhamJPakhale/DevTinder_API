@@ -5,6 +5,9 @@ const ConnectionRequest = require("../models/connectionRequest");
 const { UserAuth } = require("../middlewares/adminAuth");
 const User = require("../models/user");
 
+// the above should required to send the email to user if we host our application to somewhere on domain name which has dns network then we can use this
+//const sendEmail = require("../utils/sendEmail");
+
 connectionRequestRoute.post(
   "/request/send/:status/:ReceiverUserId",
   UserAuth,
@@ -57,6 +60,10 @@ connectionRequestRoute.post(
       });
 
       await connectionrequestdata.save();
+
+      // we can pass dynamic data to email template - in run function - that we will access in sendEmail.js
+      //const sendEmailtoUser = await sendEmail.run();
+      // console.log("sendEmailtoUser", sendEmailtoUser);
 
       const sendername = req.user.firstName;
       const receivername = userexists.firstName;
