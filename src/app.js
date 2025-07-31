@@ -7,6 +7,7 @@ const authRouter = require("./routes/auth");
 const profileRoute= require("./routes/profile");
 const connectionRequestRoute = require("./routes/connectionRequest");
 const userRoute = require("./routes/user");
+require("./utils/cronjob"); 
 
 
 const app = express();
