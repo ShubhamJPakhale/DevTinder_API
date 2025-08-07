@@ -46,7 +46,8 @@ const userSchema = mongoose.Schema(
     about: { type: String, default: "This is the default about of user !!" },
     photoUrl: {
       type: String,
-      default: "https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png",
+      default:
+        "https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png",
       validate(value) {
         if (!validator.isURL(value)) {
           throw new Error("Invalid Photo URL : " + value);
@@ -62,6 +63,13 @@ const userSchema = mongoose.Schema(
         message: "Maximum 10 skills allowed for the user!!",
       },
     },
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    membershipType: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
@@ -76,12 +84,15 @@ userSchema.methods.getJWTToken = async function () {
   return token;
 };
 
-userSchema.methods.passwordValidation = async function(userenteredpassword){
+userSchema.methods.passwordValidation = async function (userenteredpassword) {
   const user = this;
 
-  const isPasswordvalid = await bcrypt.compare(userenteredpassword, user.password);
+  const isPasswordvalid = await bcrypt.compare(
+    userenteredpassword,
+    user.password
+  );
 
   return isPasswordvalid;
-}
+};
 
 module.exports = mongoose.model("User", userSchema);

@@ -7,6 +7,7 @@ const authRouter = require("./routes/auth");
 const profileRoute= require("./routes/profile");
 const connectionRequestRoute = require("./routes/connectionRequest");
 const userRoute = require("./routes/user");
+const paymentRouter = require("./routes/payment");
 require("./utils/cronjob"); 
 
 
@@ -27,6 +28,7 @@ app.use("/",authRouter);
 app.use("/",profileRoute);
 app.use("/",connectionRequestRoute);
 app.use("/",userRoute);
+app.use("/",paymentRouter);
 
 connecttoDB()
   .then(() => {
