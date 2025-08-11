@@ -17,8 +17,6 @@ chatRouter.get("/chat/:targetUserId", UserAuth, async (req, res) => {
     ],
   });
 
-  console.log("isFriend -", isFriend);
-
   if (!isFriend) return res.send("you are not mutual connection !!");
 
   // find the chat between userId and targetUserId fron db if found -

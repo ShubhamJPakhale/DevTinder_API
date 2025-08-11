@@ -63,7 +63,6 @@ connectionRequestRoute.post(
 
       // we can pass dynamic data to email template - in run function - that we will access in sendEmail.js
       //const sendEmailtoUser = await sendEmail.run();
-      // console.log("sendEmailtoUser", sendEmailtoUser);
 
       const sendername = req.user.firstName;
       const receivername = userexists.firstName;

@@ -22,7 +22,6 @@ const initializeSocketIO = (server) => {
     socket.on("joinChat", ({ userFirstName, userId, targetUserId }) => {
       const roomId = secretRoomId(userId, targetUserId);
       socket.join(roomId);
-      console.log(`${userFirstName} joined room: ${roomId}`);
     });
 
     socket.on(
@@ -38,8 +37,6 @@ const initializeSocketIO = (server) => {
               { senderUserId: targetUserId, receiverUserId: userId, status: "accepted" },
             ],
           });
-
-          console.log("isFriend -", isFriend);
 
           if (!isFriend) return res.send("you are not mutual connection !!");
 
